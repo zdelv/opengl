@@ -1,0 +1,1 @@
+g++ -v ../src/glad.c main.cpp -o program.out -I../include -lGL -lGLU -lglfw3 -lX11 -lXxf86vm -lXrandr -lpthread -lXi -ldl -lXinerama -lXcursor
