@@ -30,23 +30,17 @@ const char* vertexShader = R"shader(
     }
 )shader";
 
-const char* greenFragmentShader = R"shader(
+//Global Uniform Shader
+//Use this rather than individually colored shaders
+const char* uniformFragmentShader = R"shader(
     #version 330 core
     out vec4 FragColor;
-    
-    void main()
-    {
-       FragColor = vec4(0.0f, 1.0f, 0.5f, 1.0f);
-    }
-)shader";
 
-const char* blueFragmentShader = R"shader(
-    #version 330 core
-    out vec4 FragColor;
-    
+    uniform vec4 Color;
+
     void main()
     {
-       FragColor = vec4(0.0f, 0.2f, 1.0f, 1.0f);
+       FragColor = Color;
     }
 )shader";
 
@@ -67,6 +61,8 @@ int main()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+    /* glfwWindowHint(GLFW_DECORATED, GL_FALSE); */
+
     
     GLFWwindow* window = glfwCreateWindow(800, 600, "Hello World", NULL, NULL);
 
@@ -85,11 +81,18 @@ int main()
         return -1;
     }
 
+    float topVertices[] {
+        1.0f, 1.0f, 0.0f, //Top Right
+        1.0f, 0.90f, 0.0f, //Bottom Right
+       -1.0f, 0.90f, 0.0f, //Bottom Left
+       -1.0f, 1.0f, 0.0f  //Top Left
+    };
+
     float vertices[] {
-        0.5f,  0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-       -0.5f, -0.5f, 0.0f,
-       -0.5f,  0.5f, 0.0f
+        1.0f,  1.0f, 0.0f,
+        1.0f, -1.0f, 0.0f,
+       -1.0f, -1.0f, 0.0f,
+       -1.0f,  1.0f, 0.0f
     };
     
     unsigned int indices[] {
@@ -112,70 +115,24 @@ int main()
         std::cout << "ERROR::SHADER::VERTEX::COMPLIATION::FAILED\n" << infoLog << std::endl;
     }
 
-    //Green Fragment Shader
-    unsigned int greenfShader;
-    greenfShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(greenfShader, 1, &greenFragmentShader, NULL);
-    glCompileShader(greenfShader);
+    //Uniform Fragment Shasder
+    unsigned int uniformfShader;
+    uniformfShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(uniformfShader, 1, &uniformFragmentShader, NULL);
+    glCompileShader(uniformfShader);
 
-    //Test for fragment shader compilation failure
-    glGetShaderiv(greenfShader, GL_COMPILE_STATUS, &success);
-    if(!success)
-    {
-        glGetShaderInfoLog(greenfShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::FRAG::COMPILATION::FAILED\n" << infoLog << std::endl;
-    }
-
-    //Blue Fragment Shader
-    unsigned int bluefShader;
-    bluefShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(bluefShader, 1, &blueFragmentShader, NULL);
-    glCompileShader(bluefShader);
-
-    //Test for fragment shader compilation failure
-    glGetShaderiv(bluefShader, GL_COMPILE_STATUS, &success);
-    if(!success)
-    {
-        glGetShaderInfoLog(bluefShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::FRAG::COMPILATION::FAILED\n" << infoLog << std::endl;
-    }
-
-
-    //Green Shader Program
-    unsigned int greenShaderProgram;
-    greenShaderProgram = glCreateProgram();
-    glAttachShader(greenShaderProgram, vShader);
-    glAttachShader(greenShaderProgram, greenfShader);
-    glLinkProgram(greenShaderProgram);
-
-    //Test for shader program compilation failure
-    glGetProgramiv(greenShaderProgram, GL_LINK_STATUS, &success);
-    if (!success)
-    {
-        glGetProgramInfoLog(greenShaderProgram, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::PROGRAM::COMPILATION::FAILURE" << infoLog << std::endl;
-    }
-
-    //Blue Shader Program
-    unsigned int blueShaderProgram;
-    blueShaderProgram = glCreateProgram();
-    glAttachShader(blueShaderProgram, vShader);
-    glAttachShader(blueShaderProgram, bluefShader);
-    glLinkProgram(blueShaderProgram);
-
-    //Test for shader program compilation failure
-    glGetProgramiv(blueShaderProgram, GL_LINK_STATUS, &success);
-    if (!success)
-    {
-        glGetProgramInfoLog(blueShaderProgram, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::PROGRAM::COMPILATION::FAILURE" << infoLog << std::endl;
-    }
+    //Uniform Shader Program
+    unsigned int uniformShaderProgram;
+    uniformShaderProgram = glCreateProgram();
+    glAttachShader(uniformShaderProgram, vShader);
+    glAttachShader(uniformShaderProgram, uniformfShader);
+    glLinkProgram(uniformShaderProgram);
 
     //Delete old shaders
     glDeleteShader(vShader);
-    glDeleteShader(greenfShader);
-    glDeleteShader(bluefShader);
+    glDeleteShader(uniformfShader);
 
+    //Title Bar
     //Vertex Attributes
     //Element Buffer Object
     unsigned int VAO, VBO, EBO;
@@ -185,9 +142,31 @@ int main()
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);   
+    glBufferData(GL_ARRAY_BUFFER, sizeof(topVertices), topVertices, GL_STATIC_DRAW);   
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
+    //Middle Rectangle
+    //Vertex Attributes
+    //Element Buffer Object
+    unsigned int mVAO, mVBO, mEBO;
+    glGenVertexArrays(1, &mVAO);
+    glGenBuffers(1, &mEBO);
+    glGenBuffers(1, &mVBO);
+    glBindVertexArray(mVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, mVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);   
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
@@ -211,11 +190,30 @@ int main()
 
         std::cout << currentColor << std::endl;
 
-        if (currentColor == 0)
-            glUseProgram(greenShaderProgram);
-        if (currentColor == 1)
-            glUseProgram(blueShaderProgram);
+        /* if (currentColor == 0) */
+        /*     glUseProgram(backgroundShaderProgram); */
+        /* if (currentColor == 1) */
+        /*     glUseProgram(titleShaderProgram); */
 
+        //Title Coloring   
+        //FragColor = vec4(0.12f, 0.12f, 0.20f, 1.0f);
+
+        //Background Coloring
+        //FragColor = vec4(0.105f, 0.125f, 0.141f, 1.0f);
+
+
+        glUseProgram(uniformShaderProgram);
+
+        int vertexColorLocation = glGetUniformLocation(uniformShaderProgram, "Color");
+        std::cout << vertexColorLocation << std::endl;
+
+        //Background Coloring
+        glUniform4f(vertexColorLocation, 0.141f, 0.164f, 0.188f, 1.0f);
+        glBindVertexArray(mVAO);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        //Title Bar Coloring
+        glUniform4f(vertexColorLocation, 0.165f, 0.180f, 0.255f, 1.0f);
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 

@@ -67,6 +67,8 @@ int main()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+    glfwWindowHint(GLFW_DECORATED, GL_FALSE);
+
     
     GLFWwindow* window = glfwCreateWindow(800, 600, "Hello World", NULL, NULL);
 
@@ -84,6 +86,13 @@ int main()
         std::cout << "Failed to init GLAD" << std::endl;
         return -1;
     }
+
+    float topVertices[] {
+        1.0f, 1.0f, 0.0f, //Top Right
+        1.0f, 0.90f, 0.0f, //Bottom Right
+       -1.0f, 0.90f, 0.0f, //Bottom Left
+       -1.0f, 1.0f, 0.0f  //Top Left
+    };
 
     float vertices[] {
         0.5f,  0.5f, 0.0f,
@@ -176,6 +185,7 @@ int main()
     glDeleteShader(greenfShader);
     glDeleteShader(bluefShader);
 
+    //Title Bar
     //Vertex Attributes
     //Element Buffer Object
     unsigned int VAO, VBO, EBO;
@@ -185,9 +195,31 @@ int main()
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);   
+    glBufferData(GL_ARRAY_BUFFER, sizeof(topVertices), topVertices, GL_STATIC_DRAW);   
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
+    //Middle Rectangle
+    //Vertex Attributes
+    //Element Buffer Object
+    unsigned int mVAO, mVBO, mEBO;
+    glGenVertexArrays(1, &mVAO);
+    glGenBuffers(1, &mEBO);
+    glGenBuffers(1, &mVBO);
+    glBindVertexArray(mVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, mVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);   
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
@@ -217,6 +249,8 @@ int main()
             glUseProgram(blueShaderProgram);
 
         glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(mVAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         glfwSwapBuffers(window);
