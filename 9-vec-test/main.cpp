@@ -1,5 +1,7 @@
 #include <glad/glad.h>
 #include <abstract/loader.h>
+//Debugging
+//#include <abstract/debug.h>
 #include <GLFW/glfw3.h>
 
 #include <iostream>
@@ -63,8 +65,21 @@ int main()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+    //Debugging
+    //glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+
     /* glfwWindowHint(GLFW_DECORATED, GL_FALSE); */
 
+    /* GLint flags; */
+    /* glGetIntegerv(GL_CONTEXT_FLAGS, &flags); */
+
+    /* if (flags & GL_CONTEXT_FLAG_DEBUG_BIT) */
+    /* { */
+    /*     glEnable(GL_DEBUG_OUTPUT); */
+    /*     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS); */
+    /*     glDebugMessageCallback(glDebugOutput, nullptr); */
+    /*     glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE); */
+    /* } */
     
     GLFWwindow* window = glfwCreateWindow(800, 600, "Hello World", NULL, NULL);
 
@@ -183,7 +198,7 @@ int main()
 
     int currentColor = 0;
 
-    Shader shaderTest("../shaders/generic.vs", "../shaders/uniform.fs");
+    ShaderProg shaderTest("../shaders/generic.vs", "../shaders/uniform.fs");
 
     while (!glfwWindowShouldClose(window))
     {
